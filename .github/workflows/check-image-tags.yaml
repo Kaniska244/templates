@@ -101,4 +101,4 @@ jobs:
           # PAT is used (rather than GITHUB_TOKEN) so the Copilot coding agent is reliably
           # triggered by the assignment. Requires `issues: write` and Copilot enabled.
           GH_TOKEN: ${{ secrets.PAT }}
-        run: ./build/report-drift-issue.sh report.txt
+        run: bash build/report-drift-issue.sh report.txt
