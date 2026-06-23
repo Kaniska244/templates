@@ -54,3 +54,51 @@ jobs:
           if ! npx tsx build/check-image-tags.ts images; then
             echo "::warning::Image tag check against latest images failed - upcoming release may break templates"
           fi
+
+  report-drift-issue:
+    name: Report Drift and Assign to Copilot
+    # Only run for scheduled syncs and manual runs - never on PRs/pushes, so we don't
+    # open issues for in-flight changes.
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/checkout@v5
+        with:
+          repository: devcontainers/images
+          fetch-depth: 0
+          path: images
+
+      - name: Check out last release tag
+        run: |
+          cd images
+          tag=$(git describe --tags --abbrev=0)
+          echo "Checking out tag: $tag"
+          git checkout "$tag"
+
+      - name: Run comparison and capture report
+        id: compare
+        run: |
+          set +e
+          npx tsx build/check-image-tags.ts images > report.txt 2>&1
+          status=$?
+          # Strip ANSI colour codes so the report is readable inside an issue.
+          sed -i -E 's/\x1B\[[0-9;]*m//g' report.txt
+          cat report.txt
+          if grep -qE '^[[:space:]]*(MISSING|UNUSED)' report.txt; then
+            echo "has_drift=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_drift=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create or refresh tracking issue and assign to Copilot
+        if: steps.compare.outputs.has_drift == 'true'
+        env:
+          # PAT is used (rather than GITHUB_TOKEN) so the Copilot coding agent is reliably
+          # triggered by the assignment. Requires `issues: write` and Copilot enabled.
+          GH_TOKEN: ${{ secrets.PAT }}
+        run: ./build/report-drift-issue.sh report.txt
