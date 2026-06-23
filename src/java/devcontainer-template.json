@@ -1,6 +1,6 @@
 {
     "id": "java",
-    "version": "5.0.0",
+    "version": "5.0.1",
     "name": "Java",
     "description": "Develop Java applications. Includes the JDK and Java extensions.",
     "documentationURL": "https://github.com/devcontainers/templates/tree/main/src/java",
@@ -15,12 +15,10 @@
                 "21-trixie",
                 "17-trixie",
                 "11-trixie",
-                "8-trixie",
                 "25-bookworm",
                 "21-bookworm",
                 "17-bookworm",
-                "11-bookworm",
-                "8-bookworm"
+                "11-bookworm"
             ],
             "default": "25-trixie"
         },
