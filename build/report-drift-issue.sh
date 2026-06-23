@@ -13,7 +13,7 @@
 set -euo pipefail
 
 REPORT_FILE="${1:?Usage: report-drift-issue.sh <report-file>}"
-REPO="${GITHUB_REPOSITORY:-devcontainers/templates}"
+REPO="${GITHUB_REPOSITORY:-kaniska244/templates}"
 OWNER="${REPO%%/*}"
 NAME="${REPO##*/}"
 LABEL="automated-image-sync"
